@@ -1,0 +1,82 @@
+/* =========================================================
+   GLOBAL BASE STYLES (VITE RESET – ERP FRIENDLY)
+   ========================================================= */
+
+/* Root typography */
+:root {
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: #1f2937; /* neutral text */
+  background: transparent;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove Vite demo centering */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+
+  /* DO NOT center here — App.css controls layout */
+  display: block;
+  background: transparent;
+}
+
+/* Links */
+a {
+  font-weight: 500;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #1d4ed8;
+}
+
+/* Headings (keep minimal, App controls design) */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* Buttons — neutral base only */
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+/* Remove Vite focus ring (handled per component) */
+button:focus,
+button:focus-visible {
+  outline: none;
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Inputs inherit font */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}

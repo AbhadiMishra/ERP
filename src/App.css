@@ -1,0 +1,86 @@
+/* ===== GLOBAL RESET ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* ===== BACKGROUND ===== */
+body {
+  min-height: 100vh;
+  background-color: #4c8cff;
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.25) 1px,
+    transparent 1px
+  );
+  background-size: 16px 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== MAIN CONTAINER (DESKTOP FIRST) ===== */
+.app-wrapper {
+  width: 900px;
+  height: 560px;
+  background: #ffffff;
+  border-radius: 16px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
+}
+
+/* ===== LEFT ILLUSTRATION PANEL ===== */
+.left-panel {
+  width: 32%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* IMAGE FIX */
+.left-panel img {
+  width: 75%;
+  max-width: 220px;
+  height: auto;
+}
+
+/* ===== RIGHT PANEL ===== */
+.right-panel {
+  flex: 1;
+  background: #f3f7ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+/* ===== RESPONSIVE DOWN ===== */
+@media (max-width: 900px) {
+  .app-wrapper {
+    width: 95%;
+    height: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-wrapper {
+    flex-direction: column;
+    border-radius: 0;
+    height: 100vh;
+  }
+
+  .left-panel {
+    display: none;
+  }
+}
+
+body.dashboard {
+  display: block;
+  align-items: unset;
+  justify-content: unset;
+  background: #f5f7fb;
+}
