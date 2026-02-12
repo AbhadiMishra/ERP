@@ -10,6 +10,7 @@ import {
     FormControl,
     Stack,
 } from "@mui/material";
+import { toast } from "react-toastify";
 
 const BASE_URL = "http://localhost:3000/api";
 
@@ -23,10 +24,10 @@ export default function Signup() {
         DOB: "",
     });
 
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    // const [error, setError] = useState("");
+    // const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
-    const [type, setType] = useState("");
+    const [type_, setType] = "text";
 
     const handleChange = (e) => {
         e.stopPropagation();
@@ -36,26 +37,32 @@ export default function Signup() {
         e.preventDefault();
 
         if (!form.username || !form.email || !form.password || !form.DOB) {
-            setError("All required fields must be filled");
+            // setError("All required fields must be filled");
+            toast.error("All required fields must be filled", {
+                toastId: "fieldEmpty",
+            });
             return;
         }
 
         if (form.type === "employee" && !form.department) {
-            setError("Department is required for employee");
+            // setError("Department is required for employee");
+            toast.error("Department is required for employee", {
+                toastId: "DeptEmpty",
+            });
             return;
         }
 
         try {
             setLoading(true);
-            setError("");
-            setSuccess("");
+            // setError("");
+            // setSuccess("");
 
             const db = "schoolDB";
             const collection = form.type === "employee" ? "users" : "students";
 
             const payload =
                 form.type === "employee"
-                    ? {...form, dob: form.DOB}
+                    ? { ...form, dob: form.DOB }
                     : {
                           username: form.username,
                           email: form.email,
@@ -72,7 +79,10 @@ export default function Signup() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
-            setSuccess("Account created successfully");
+            // setSuccess("Account created successfully");
+            toast.success("Account created successfully", {
+                toastId: "AccountCreated",
+            });
             setForm({
                 type: "employee",
                 username: "",
@@ -82,7 +92,8 @@ export default function Signup() {
                 DOB: "",
             });
         } catch (err) {
-            setError(err.message || "Signup failed");
+            // setError(err.message || "Signup failed");
+            toast.error(err.message, { toastId: "Error" });
         } finally {
             setLoading(false);
         }
@@ -148,15 +159,11 @@ export default function Signup() {
                     {/* Date od Birth */}
                     <TextField
                         label='Date of Birth'
-                        type={form.DOB ? "date" : "text"}
+                        type='date'
                         name='DOB'
-                        value={form.DOB}
+                        value={form.DOB || ""}
                         onChange={handleChange}
-                        onFocus={() => setType("date")}
-                        onBlur={() => {
-                            if (!form.DOB) setType("text");
-                        }}
-                        slotProps={{ inputLabel: { shrink: true } }}
+                        InputLabelProps={{ shrink: true }}
                         fullWidth
                     />
 
@@ -172,17 +179,17 @@ export default function Signup() {
                     )}
 
                     {/* ERROR / SUCCESS */}
-                    {error && (
+                    {/* {error && (
                         <Typography color='error' variant='body2'>
                             {error}
                         </Typography>
-                    )}
+                    )} */}
 
-                    {success && (
+                    {/* {success && (
                         <Typography color='success.main' variant='body2'>
                             {success}
                         </Typography>
-                    )}
+                    )} */}
 
                     {/* SUBMIT */}
                     <Button

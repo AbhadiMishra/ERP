@@ -60,7 +60,7 @@ export default function ForgotPassword() {
         }
     };
 
-    const onBack = () => (useNavigate(window.history.back()))
+    const onBack = () => useNavigate(window.history.back());
 
     return (
         <Box sx={{ width: "100%", maxWidth: 420, mx: "auto" }}>

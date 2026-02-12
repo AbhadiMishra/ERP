@@ -9,13 +9,25 @@ import Wrapper from "./frontend/Wrapper.jsx";
 
 export default function App() {
     return (
-                <Routes>
-                    <Route path='/' element={<Wrapper children={<Login />}></Wrapper>} />
-                    <Route path='/forgot' element={<Wrapper children={<ForgotPassword />}></Wrapper>} />
-                    <Route path='/signup' element={<Wrapper children={<Signup />}></Wrapper>} />
-                    <Route path='/manage' element={<Wrapper children={<DeleteUpdate />}></Wrapper>} />
-                    <Route path='/dashboard' element={<Dashboard />} />
-                </Routes> 
+        <Routes>
+            <Route
+                path='/'
+                element={<Wrapper children={<Login />}></Wrapper>}
+            />
+            <Route
+                path='/forgot'
+                element={<Wrapper children={<ForgotPassword />}></Wrapper>}
+            />
+            <Route
+                path='/signup'
+                element={<Wrapper children={<Signup />}></Wrapper>}
+            />
+            <Route
+                path='/manage'
+                element={<Wrapper children={<DeleteUpdate />}></Wrapper>}
+            />
+            <Route path='/dashboard' element={<Dashboard />} />
+        </Routes>
     );
 }
 
