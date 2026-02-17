@@ -1,11 +1,11 @@
-import Login from "./Login.jsx";
-import ForgotPassword from "./ForgotPass.jsx";
-import Signup from "./SignUp.jsx";
-import DeleteUpdate from "./Delete_Update.jsx";
-import Dashboard from "./frontend/Dashboard.jsx";
+import Login from "./components/frontend/Login.jsx";
+import ForgotPassword from "./components/frontend/ForgotPass.jsx";
+import Signup from "./components/frontend/SignUp.jsx";
+import DeleteUpdate from "./components/frontend/Delete_Update.jsx";
+import Dashboard from "./components/frontend/Dashboard.jsx";
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import Wrapper from "./frontend/Wrapper.jsx";
+import Wrapper from "./components/frontend/Wrapper.jsx";
 
 export default function App() {
     return (
