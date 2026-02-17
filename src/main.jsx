@@ -4,7 +4,7 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router'
 import { ToastContainer } from 'react-toastify'
 import { ErrorBoundary } from "react-error-boundary";
-import Fallback from './errorBoundary/GenericFallback.jsx'
+import Fallback from './components/errorBoundary/GenericFallback.jsx'
 
 
 createRoot(document.getElementById('root')).render(
