@@ -32,7 +32,7 @@ export default function DataTable({ sendCount }) {
 
     // Pagination state
     const [page, setPage] = useState(1);
-    const [limit] = useState(5);
+    const [limit] = useState(7);
 
     // Sorting state
     const [sortOrder, setSortOrder] = useState("asc");

@@ -13,7 +13,20 @@ export default function Dashboard() {
     // Redux state
     const { userCount, isAuthenticated } = useSelector((state) => state.user);
 
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false);// ...
+    dispatch(
+        loginUser({
+            email: form.email,
+            password: form.password,
+            loginType: form.loginType,
+            // Add department if it's a credential
+            department: form.loginType === "employee" ? form.department : undefined,
+        })
+    );
+    // ...
+    // c:\Users\djabh\Desktop\ERP\erp\src\storeRedux\slices.js
+    const BASE_URL = "http://localhost:3000/api";
+    
 
     useEffect(() => {
         document.body.classList.add("dashboard");
