@@ -11,6 +11,7 @@ class User {
         this.createdAt = new Date();
         this.dateOfBirth = dob;
         this.department = department;
+        this.role = 'employee'; // Default role for users (employees)
     }
 
     encryptPassword(password) {

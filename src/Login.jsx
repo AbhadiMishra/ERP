@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
     Box,
     Button,
@@ -12,11 +13,16 @@ import {
     Stack,
 } from "@mui/material";
 import { toast } from "react-toastify";
-
-const BASE_URL = "http://localhost:3000/api";
+import { loginUser, clearError } from "./storeRedux/slices.js";
 
 export default function Login() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Redux state
+    const { loading, error, isAuthenticated } = useSelector(
+        (state) => state.user
+    );
 
     const [form, setForm] = useState({
         loginType: "employee",
@@ -26,8 +32,23 @@ export default function Login() {
     });
 
     const [errors, setErrors] = useState({});
-    const [serverError, setServerError] = useState("");
-    const [loading, setLoading] = useState(false);
+
+    /* ---------------- EFFECTS ---------------- */
+
+    useEffect(() => {
+        // Redirect to dashboard if authenticated
+        if (isAuthenticated) {
+            navigate("/dashboard");
+        }
+    }, [isAuthenticated, navigate]);
+
+    useEffect(() => {
+        // Show error toast if there's a Redux error
+        if (error) {
+            toast.error(error);
+            dispatch(clearError());
+        }
+    }, [error, dispatch]);
 
     /* ---------------- VALIDATION ---------------- */
 
@@ -57,10 +78,9 @@ export default function Login() {
     /* ---------------- HANDLERS ---------------- */
 
     const handleChange = (e) => {
-      setErrors({})
+        setErrors({});
         const { name, value } = e.target;
         setForm((prev) => ({ ...prev, [name]: value }));
-        
     };
 
     const handleSubmit = async (e) => {
@@ -70,76 +90,55 @@ export default function Login() {
         setErrors(validationErrors);
         if (Object.keys(validationErrors).length !== 0) return;
 
-        try {
-            setLoading(true);
-            setServerError("");
-
-            const db = "schoolDB";
-            const collection =
-                form.loginType === "employee" ? "users" : "students";
-
-            const response = await fetch(
-                `${BASE_URL}/${db}/${collection}/login`,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        email: form.email,
-                        password: form.password,
-                    }),
-                },
-            );
-
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || "Login failed");
-            toast.success("Login Success");
-            navigate("/dashboard");
-        } catch (err) {
-            setServerError(err.message);
-            toast.error(err.message)
-        } finally {
-            setLoading(false);
-        }
+        // Dispatch Redux action
+        dispatch(
+            loginUser({
+                email: form.email,
+                password: form.password,
+                loginType: form.loginType,
+            })
+        );
     };
 
     /* ---------------- UI ---------------- */
 
     return (
         <Box sx={{ width: "100%", maxWidth: 420 }}>
-            <Typography variant='h4' fontWeight={700} mb={1}>
+            <Typography variant="h4" fontWeight={700} mb={1}>
                 my<span style={{ color: "#1976d2" }}>M</span>school
             </Typography>
 
-            <Typography variant='h6'>Sign in to Edunext ERP</Typography>
-            <Typography variant='body2' color='text.secondary' mb={3}>
+            <Typography variant="h6">Sign in to Edunext ERP</Typography>
+            <Typography variant="body2" color="text.secondary" mb={3}>
                 Enter your credentials to continue
             </Typography>
-            <Box component='form' onSubmit={handleSubmit} noValidate>
+            <Box component="form" onSubmit={handleSubmit} noValidate>
                 <Stack spacing={2}>
                     {/* LOGIN TYPE */}
                     <FormControl>
                         <RadioGroup
                             row
-                            name='loginType'
+                            name="loginType"
                             value={form.loginType}
-                            onChange={handleChange}>
+                            onChange={handleChange}
+                        >
                             <FormControlLabel
-                                value='employee'
+                                value="employee"
                                 control={<Radio />}
-                                label='Employee'
+                                label="Employee"
                             />
                             <FormControlLabel
-                                value='student'
+                                value="student"
                                 control={<Radio />}
-                                label='Student'
+                                label="Student"
                             />
                         </RadioGroup>
                     </FormControl>
 
                     {/* EMAIL */}
                     <TextField
-                        label='Email ID'
-                        name='email'
+                        label="Email ID"
+                        name="email"
                         value={form.email}
                         onChange={handleChange}
                         error={!!errors.email}
@@ -149,9 +148,9 @@ export default function Login() {
 
                     {/* PASSWORD */}
                     <TextField
-                        label='Password'
-                        type='password'
-                        name='password'
+                        label="Password"
+                        type="password"
+                        name="password"
                         value={form.password}
                         onChange={handleChange}
                         error={!!errors.password}
@@ -162,8 +161,8 @@ export default function Login() {
                     {/* DEPARTMENT */}
                     {form.loginType === "employee" && (
                         <TextField
-                            label='Department'
-                            name='department'
+                            label="Department"
+                            name="department"
                             value={form.department}
                             onChange={handleChange}
                             error={!!errors.department}
@@ -172,40 +171,32 @@ export default function Login() {
                         />
                     )}
 
-                    {serverError && (
-                        <Typography color='error' variant='body2'>
-                            {serverError}
-                        </Typography>
-                    )}
-
                     {/* FORGOT */}
                     <Button
-                        variant='text'
-                        size='small'
+                        variant="text"
+                        size="small"
                         sx={{ alignSelf: "flex-start" }}
-                        onClick={() => navigate("/forgot")}>
+                        onClick={() => navigate("/forgot")}
+                    >
                         Forgot Password?
                     </Button>
 
                     {/* SUBMIT */}
                     <Button
-                        type='submit'
-                        variant='contained'
-                        size='large'
-                        disabled={loading}>
+                        type="submit"
+                        variant="contained"
+                        size="large"
+                        disabled={loading}
+                    >
                         {loading ? "Signing in..." : "Sign in"}
                     </Button>
 
                     {/* EXTRA LINKS */}
-                    <Stack direction='row' spacing={2} justifyContent='center'>
-                        <Button
-                            variant='text'
-                            onClick={() => navigate("/signup")}>
+                    <Stack direction="row" spacing={2} justifyContent="center">
+                        <Button variant="text" onClick={() => navigate("/signup")}>
                             Create Account
                         </Button>
-                        <Button
-                            variant='text'
-                            onClick={() => navigate("/manage")}>
+                        <Button variant="text" onClick={() => navigate("/manage")}>
                             Update / Delete
                         </Button>
                     </Stack>

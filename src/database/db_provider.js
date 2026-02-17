@@ -25,7 +25,7 @@ export async function signUp(data, collectionName, databaseName) {
                   data.dob,
                   idCounter,
               )
-            : { ...data, createdAt: new Date() };
+            : { ...data, createdAt: new Date(), role: 'student' }; // Default role for students
 
     const result = await collection.insertOne(record);
 
@@ -56,6 +56,7 @@ export async function signIn(email, password, collectionName, databaseName) {
         message: "Login successful",
         id: record._Id,
         username: record.username,
+        role: record.role, // Include the user's role
     };
 }
 

@@ -1,148 +1,159 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  MenuItem,
-  Stack,
+    Box,
+    Button,
+    TextField,
+    Typography,
+    MenuItem,
+    Stack,
 } from "@mui/material";
-
-const BASE_URL = "http://localhost:3000/api";
+import { toast } from "react-toastify";
+import {
+    updateUser,
+    deleteUser,
+    clearError,
+    clearSuccessMessage,
+} from "./storeRedux/slices.js";
 
 export default function DeleteUpdate() {
-  const [form, setForm] = useState({
-    collection: "users",
-    email: "",
-    department: "",
-  });
+    const dispatch = useDispatch();
 
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+    // Redux state
+    const { actionLoading, actionError, successMessage } = useSelector(
+        (state) => state.user
+    );
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+    const [form, setForm] = useState({
+        collection: "users",
+        email: "",
+        department: "",
+    });
 
-  const handleUpdate = async () => {
-    try {
-      setError("");
-      setMessage("");
+    /* ---------------- EFFECTS ---------------- */
 
-      const res = await fetch(
-        `${BASE_URL}/schoolDB/${form.collection}/${form.email}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ department: form.department }),
+    useEffect(() => {
+        if (actionError) {
+            toast.error(actionError);
+            dispatch(clearError());
         }
-      );
+    }, [actionError, dispatch]);
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+    useEffect(() => {
+        if (successMessage) {
+            toast.success(successMessage);
+            dispatch(clearSuccessMessage());
+        }
+    }, [successMessage, dispatch]);
 
-      setMessage("Record updated successfully");
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+    /* ---------------- HANDLERS ---------------- */
 
-  const handleDelete = async () => {
-    try {
-      setError("");
-      setMessage("");
+    const handleChange = (e) => {
+        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    };
 
-      const res = await fetch(
-        `${BASE_URL}/schoolDB/${form.collection}/${form.email}`,
-        { method: "DELETE" }
-      );
+    const handleUpdate = async () => {
+        if (!form.email) {
+            toast.error("Email is required");
+            return;
+        }
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+        if (!form.department) {
+            toast.error("Department is required for update");
+            return;
+        }
 
-      setMessage("Record deleted successfully");
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+        dispatch(
+            updateUser({
+                collection: form.collection,
+                email: form.email,
+                updates: { department: form.department },
+            })
+        );
+    };
 
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: 420,
-        mx: "auto",
-      }}
-    >
-      <Typography variant="h5" fontWeight={600} mb={3}>
-        Update / Delete Record
-      </Typography>
+    const handleDelete = async () => {
+        if (!form.email) {
+            toast.error("Email is required");
+            return;
+        }
 
-      <Stack spacing={2}>
-        {/* COLLECTION */}
-        <TextField
-          select
-          label="User Type"
-          name="collection"
-          value={form.collection}
-          onChange={handleChange}
-          fullWidth
+        if (window.confirm("Are you sure you want to delete this record?")) {
+            dispatch(
+                deleteUser({
+                    collection: form.collection,
+                    email: form.email,
+                })
+            );
+        }
+    };
+
+    /* ---------------- UI ---------------- */
+
+    return (
+        <Box
+            sx={{
+                width: "100%",
+                maxWidth: 420,
+                mx: "auto",
+            }}
         >
-          <MenuItem value="users">Employee</MenuItem>
-          <MenuItem value="students">Student</MenuItem>
-        </TextField>
+            <Typography variant="h5" fontWeight={600} mb={3}>
+                Update / Delete Record
+            </Typography>
 
-        {/* USER ID */}
-        <TextField
-          label="Email"
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          fullWidth
-        />
+            <Stack spacing={2}>
+                {/* COLLECTION */}
+                <TextField
+                    select
+                    label="User Type"
+                    name="collection"
+                    value={form.collection}
+                    onChange={handleChange}
+                    fullWidth
+                >
+                    <MenuItem value="users">Employee</MenuItem>
+                    <MenuItem value="students">Student</MenuItem>
+                </TextField>
 
-        {/* DEPARTMENT */}
-        <TextField
-          label="New Department (Update only)"
-          name="department"
-          value={form.department}
-          onChange={handleChange}
-          fullWidth
-        />
+                {/* USER ID */}
+                <TextField
+                    label="Email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    fullWidth
+                />
 
-        {/* ERROR / SUCCESS */}
-        {error && (
-          <Typography color="error" variant="body2">
-            {error}
-          </Typography>
-        )}
+                {/* DEPARTMENT */}
+                <TextField
+                    label="New Department (Update only)"
+                    name="department"
+                    value={form.department}
+                    onChange={handleChange}
+                    fullWidth
+                />
 
-        {message && (
-          <Typography color="success.main" variant="body2">
-            {message}
-          </Typography>
-        )}
+                {/* ACTION BUTTONS */}
+                <Stack direction="row" spacing={2}>
+                    <Button
+                        variant="contained"
+                        onClick={handleUpdate}
+                        disabled={!form.email || actionLoading}
+                    >
+                        {actionLoading ? "Updating..." : "Update"}
+                    </Button>
 
-        {/* ACTION BUTTONS */}
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="contained"
-            onClick={handleUpdate}
-            disabled={!form.email}
-          >
-            Update
-          </Button>
-
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleDelete}
-            disabled={!form.email}
-          >
-            Delete
-          </Button>
-        </Stack>
-      </Stack>
-    </Box>
-  );
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={handleDelete}
+                        disabled={!form.email || actionLoading}
+                    >
+                        {actionLoading ? "Deleting..." : "Delete"}
+                    </Button>
+                </Stack>
+            </Stack>
+        </Box>
+    );
 }

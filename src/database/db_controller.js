@@ -19,6 +19,12 @@ function validateSource(db, collection) {
     }
 }
 
+// Helper function for role-based access control (for demonstration, not production-ready security)
+function checkAdminAccess(requesterRole) {
+    if (requesterRole !== 'admin') {
+        throw new Error("Access denied: Admin privileges required.");
+    }
+}
 export async function createRecord(req, res) {
     try {
         const { db, collection } = req.params;
@@ -49,6 +55,7 @@ export async function login(req, res) {
         const result = await signIn(email, password, collection, db);
 
         res.json(result);
+        // The result now includes the user's role from db_provider.js
     } catch (err) {
         res.status(401).json({ error: err.message });
     }

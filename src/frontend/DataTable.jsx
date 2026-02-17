@@ -11,62 +11,105 @@ import {
     Button,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import SortByAlphaOutlinedIcon from "@mui/icons-material/SortByAlphaOutlined";
 import { toast } from "react-toastify";
+import {
+    fetchUsers,
+    deleteUser,
+    clearError,
+    clearSuccessMessage,
+} from "../storeRedux/slices.js";
 
-const BASE_URL = "http://localhost:3000/api";
-const db = "schoolDB";
-const collection = "users";
-
-export default function DataTable() {
-    const [loading, setLoading] = useState(true);
-    const [users, setUsers] = useState([]);
-    const [refresh, setRefresh] = useState(false);
+export default function DataTable({ sendCount }) {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    async function fetchUsers() {
-        try {
-            const response = await axios(
-                `${BASE_URL}/${db}/${collection}/records`,
-            );
-            setUsers(response?.data || []);
-        } catch (err) {
-            console.error("Failed to fetch users: ", err);
-        } finally {
-            setLoading(false);
+    // Redux state
+    const { users, loading, actionLoading, error, actionError, successMessage } =
+        useSelector((state) => state.user);
+
+    // Pagination state
+    const [page, setPage] = useState(1);
+    const [limit] = useState(5);
+
+    // Sorting state
+    const [sortOrder, setSortOrder] = useState("asc");
+    const [sortedUsers, setSortedUsers] = useState([]);
+
+    // Calculate pagination indexes
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+
+    /* ---------------- EFFECTS ---------------- */
+
+    useEffect(() => {
+        // Fetch users on component mount
+        dispatch(fetchUsers({ collection: "users", db: "schoolDB" }));
+    }, [dispatch]);
+
+    useEffect(() => {
+        // Update sorted users when users change
+        setSortedUsers(users);
+    }, [users]);
+
+    useEffect(() => {
+        // Send count to parent
+        if (sendCount) {
+            sendCount(users.length);
         }
-    }
+    }, [users.length, sendCount]);
+
+    useEffect(() => {
+        // Handle errors
+        if (error) {
+            toast.error(error);
+            dispatch(clearError());
+        }
+        if (actionError) {
+            toast.error(actionError);
+            dispatch(clearError());
+        }
+    }, [error, actionError, dispatch]);
+
+    useEffect(() => {
+        // Handle success messages
+        if (successMessage) {
+            toast.success(successMessage);
+            dispatch(clearSuccessMessage());
+        }
+    }, [successMessage, dispatch]);
+
+    /* ---------------- HANDLERS ---------------- */
 
     const handleDelete = async (email) => {
-        try {
-            const res = await fetch(
-                `${BASE_URL}/schoolDB/${collection}/${email}`,
-                { method: "DELETE" },
-            );
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-
-            setRefresh((prev) => !prev);
-            toast.success("Record deleted successfully", {toastId: users._id});
-        } catch (err) {
-            toast.error(err.message, {toastId: "Error"});
+        if (window.confirm("Are you sure you want to delete this record?")) {
+            dispatch(deleteUser({ collection: "users", email }));
         }
     };
 
-    useEffect(() => {
-        setLoading(true);
-        fetchUsers();
-    }, [refresh]);
+    const handleSortByEmail = () => {
+        const sorted = [...sortedUsers].sort((a, b) => {
+            if (sortOrder === "asc") {
+                return a.email.localeCompare(b.email);
+            } else {
+                return b.email.localeCompare(a.email);
+            }
+        });
+
+        setSortedUsers(sorted);
+        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    };
+
+    /* ---------------- UI ---------------- */
 
     if (loading) return <Typography>Loading...</Typography>;
 
     return (
         <Box>
-            <Typography variant='h6' fontWeight={600} mb={2}>
-                De-Register / TC Report
+            <Typography variant="h6" fontWeight={600} mb={2}>
+                Employees Record
             </Typography>
 
             <TableContainer component={Paper}>
@@ -75,18 +118,20 @@ export default function DataTable() {
                         <TableRow>
                             <TableCell>ID</TableCell>
                             <TableCell>Name</TableCell>
+
+                            {/* Email Sorting */}
                             <TableCell>
-                                Email{" "}
-                                <Button sx={{ minWidth: "10px" }}>
+                                Email
+                                <Button
+                                    sx={{ minWidth: "10px" }}
+                                    onClick={handleSortByEmail}
+                                >
                                     <SortByAlphaOutlinedIcon
-                                        sx={{
-                                            fontSize: "1rem",
-                                            padding: 0,
-                                            margin: 0,
-                                        }}
+                                        sx={{ fontSize: "1rem" }}
                                     />
                                 </Button>
                             </TableCell>
+
                             <TableCell>Created</TableCell>
                             <TableCell>DOB</TableCell>
                             <TableCell>Department</TableCell>
@@ -95,28 +140,44 @@ export default function DataTable() {
                     </TableHead>
 
                     <TableBody>
-                        {users?.map((ele) => (
+                        {/* Apply Pagination */}
+                        {sortedUsers.slice(startIndex, endIndex).map((ele) => (
                             <TableRow key={ele?._id}>
                                 <TableCell>{ele?.Id}</TableCell>
                                 <TableCell>{ele?.username}</TableCell>
                                 <TableCell>{ele?.email}</TableCell>
-                                <TableCell>{ele?.createdAt}</TableCell>
-                                <TableCell>{ele?.dateOfBirth}</TableCell>
+
+                                {/* Format Dates */}
+                                <TableCell>
+                                    {new Date(ele?.createdAt).toLocaleDateString()}
+                                </TableCell>
+
+                                <TableCell>
+                                    {new Date(ele?.dateOfBirth).toLocaleDateString()}
+                                </TableCell>
+
                                 <TableCell>{ele?.department}</TableCell>
+
                                 <TableCell>
                                     <Button
-                                        size='small'
-                                        variant='contained'
+                                        size="small"
+                                        variant="contained"
                                         onClick={() => navigate("/manage")}
-                                        sx={{ mb: 2, margin: "0.5rem" }}>
+                                        sx={{ m: 0.5 }}
+                                        disabled={actionLoading}
+                                    >
                                         Update
                                     </Button>
+
                                     <Button
-                                        size='small'
-                                        variant='contained'
+                                        size="small"
+                                        variant="contained"
+                                        color="error"
                                         onClick={() => handleDelete(ele?.email)}
-                                        sx={{ mb: 2, margin: "0.5rem" }}>
-                                        Delete
+                                        sx={{ m: 0.5 }}
+                                        disabled={actionLoading}
+                                    >
+                                        {actionLoading ? "..." : "Delete"}
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -124,6 +185,27 @@ export default function DataTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            {/* Simple Pagination Controls */}
+            <Box mt={2}>
+                <Button
+                    disabled={page === 1}
+                    onClick={() => setPage((prev) => prev - 1)}
+                >
+                    Previous
+                </Button>
+
+                <Typography component="span" sx={{ mx: 2 }}>
+                    Page {page}
+                </Typography>
+
+                <Button
+                    disabled={endIndex >= sortedUsers.length}
+                    onClick={() => setPage((prev) => prev + 1)}
+                >
+                    Next
+                </Button>
+            </Box>
         </Box>
     );
 }
